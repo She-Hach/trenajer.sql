@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Крестики-нолики онлайн</title>
+<style>
+:root{color-scheme:light dark;--bg1:#e0e7ff;--bg2:#fce7f3;--card:rgba(255,255,255,.75);--text:#1e1b4b;--mut:#6b7280;--x:#6366f1;--o:#ec4899;--cell:#fff;--bd:rgba(99,102,241,.18);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0f172a;--bg2:#2e1065;--card:rgba(30,27,75,.6);--text:#eef2ff;--mut:#a5b4fc;--cell:#1e1b4b;--bd:rgba(165,180,252,.2)}}
+:root[data-theme="dark"]{--bg1:#0f172a;--bg2:#2e1065;--card:rgba(30,27,75,.6);--text:#eef2ff;--mut:#a5b4fc;--cell:#1e1b4b;--bd:rgba(165,180,252,.2)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);background:linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed;display:flex;justify-content:center;padding:20px 14px;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;width:340px;height:340px;border-radius:50%;filter:blur(70px);opacity:.45;z-index:0;animation:float 14s ease-in-out infinite alternate}
+body::before{background:var(--x);top:-80px;left:-80px}
+body::after{background:var(--o);bottom:-90px;right:-90px;animation-delay:-7s}
+@keyframes float{to{transform:translate(60px,50px) scale(1.2)}}
+main{position:relative;z-index:1;width:100%;max-width:420px}
+h1{text-align:center;font-size:2rem;margin:6px 0 18px;letter-spacing:-.5px}
+h1 span{color:var(--o)}
+h1 i{font-style:normal;color:var(--x)}
+.card{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--bd);border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(79,70,229,.18);animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+.hidden{display:none!important}
+.sub{text-align:center;color:var(--mut);margin:0 0 18px}
+.btn{font:inherit;font-weight:600;border:1px solid var(--bd);background:var(--cell);color:var(--text);padding:12px 18px;border-radius:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;width:100%}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(99,102,241,.25)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--x),var(--o));color:#fff;border:0}
+.btn.ghost{background:transparent}
+.btn.sm{width:auto;padding:6px 12px;font-size:.85rem}
+.join{display:flex;gap:8px;margin:12px 0}
+.join input{flex:1;min-width:0;font:inherit;padding:12px;border-radius:14px;border:1px solid var(--bd);background:var(--cell);color:var(--text);text-transform:lowercase}
+.join .btn{width:auto}
+.msg{color:var(--o);text-align:center;font-size:.9rem;min-height:1.2em;margin:10px 0 0}
+.top{display:flex;gap:8px;margin-bottom:14px}
+.chip{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;border-radius:14px;background:var(--cell);border:2px solid transparent;transition:all .3s;font-size:.78rem;color:var(--mut)}
+.chip b{font-size:1.3rem}
+.chip em{font-style:normal;font-weight:700;font-size:1.2rem;color:var(--text)}
+#chX b{color:var(--x)}#chO b{color:var(--o)}
+.chip.act{transform:scale(1.06)}
+#chX.act{border-color:var(--x);box-shadow:0 0 18px rgba(99,102,241,.45)}
+#chO.act{border-color:var(--o);box-shadow:0 0 18px rgba(236,72,153,.45)}
+#status{text-align:center;font-weight:700;font-size:1.15rem;min-height:1.6em;margin-bottom:12px}
+#status.pop{animation:pop .4s}
+@keyframes pop{50%{transform:scale(1.12)}}
+#board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;aspect-ratio:1;margin-bottom:14px}
+.cell{background:var(--cell);border-radius:18px;border:1px solid var(--bd);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:14%;transition:transform .15s,background .3s,box-shadow .3s}
+.cell.ok:hover{transform:scale(1.06);box-shadow:0 6px 18px rgba(99,102,241,.3)}
+.cell.off{cursor:default}
+.cell svg{width:100%;height:100%;overflow:visible}
+.cell path,.cell circle{fill:none;stroke-width:11;stroke-linecap:round;stroke-dasharray:90;stroke-dashoffset:90;animation:draw .35s ease forwards}
+.cell circle{stroke-dasharray:180;stroke-dashoffset:180;animation-duration:.45s}
+.cell path+path{animation-delay:.2s}
+.X path{stroke:var(--x)}.O circle{stroke:var(--o)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.cell.win{animation:glow .8s ease-in-out infinite alternate}
+.cell.win.X{background:rgba(99,102,241,.22)}.cell.win.O{background:rgba(236,72,153,.22)}
+@keyframes glow{to{transform:scale(1.07)}}
+.share{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;font-size:.9rem;color:var(--mut)}
+.share b{font-size:1.15rem;letter-spacing:2px;color:var(--text)}
+.row{display:flex;gap:8px}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden}
+#fx span{position:absolute;top:-20px;width:10px;height:14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+<main>
+<h1><i>Крестики</i> <span>·</span> нолики</h1>
+
+<section id="lobby" class="card">
+  <p class="sub">Играйте с другом онлайн в реальном времени</p>
+  <button id="create" class="btn primary">Создать онлайн-игру</button>
+  <div class="join"><input id="codeIn" maxlength="12" placeholder="Код игры" autocomplete="off"><button id="joinBtn" class="btn">Войти</button></div>
+  <button id="localBtn" class="btn ghost">Играть на одном устройстве</button>
+  <p id="lobbyMsg" class="msg"></p>
+</section>
+
+<section id="game" class="card hidden">
+  <div class="top">
+    <div class="chip" id="chX"><b>X</b><span id="nX"></span><em id="sX">0</em></div>
+    <div class="chip"><b>=</b><span>Ничьи</span><em id="sD">0</em></div>
+    <div class="chip" id="chO"><b>O</b><span id="nO"></span><em id="sO">0</em></div>
+  </div>
+  <div id="status"></div>
+  <div id="board"></div>
+  <div id="share" class="share hidden"><span>Код: <b id="codeShow"></b></span><button id="copy" class="btn sm">Скопировать ссылку</button></div>
+  <div class="row"><button id="again" class="btn primary">Новый раунд</button><button id="leave" class="btn ghost">Выйти</button></div>
+</section>
+</main>
+<div id="fx"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const fresh = (score, starter) => ({board: Array(9).fill(''), turn: starter || 'X', starter: starter || 'X', seq: 0, win: '', line: [], score: score || {X:0, O:0, D:0}});
+
+let S = fresh(), shown = Array(9).fill(''), local = false, room = null, rc = null;
+let myRole = null, myT = Date.now(), canClaim = false, celebrated = -1, lastStatus = '';
+
+function check(b) {
+  for (const l of LINES) { const [a, c, d] = l; if (b[a] && b[a] === b[c] && b[a] === b[d]) return {w: b[a], l}; }
+  return b.every(Boolean) ? {w: 'D', l: []} : null;
+}
+
+function clean(d) {
+  if (!d || !Array.isArray(d.board) || d.board.length !== 9 || typeof d.seq !== 'number') return null;
+  const ok = v => v === 'X' || v === 'O';
+  const board = d.board.map(v => ok(v) ? v : '');
+  const sc = d.score || {};
+  const n = v => Math.min(999, Math.max(0, Number(v) | 0));
+  const r = check(board);
+  return {board, turn: ok(d.turn) ? d.turn : 'X', starter: ok(d.starter) ? d.starter : 'X', seq: d.seq | 0,
+    win: r ? r.w : '', line: r ? r.l : [], score: {X: n(sc.X), O: n(sc.O), D: n(sc.D)}};
+}
+
+function applyMove(i) {
+  S.board[i] = S.turn;
+  const r = check(S.board);
+  if (r) { S.win = r.w; S.line = r.l; S.score[r.w]++; } else S.turn = S.turn === 'X' ? 'O' : 'X';
+  S.seq++;
+  render(); send();
+}
+function newRound() {
+  const st = S.starter === 'X' ? 'O' : 'X', seq = S.seq + 1;
+  S = fresh(S.score, st); S.seq = seq;
+  render(); send();
+}
+function send() { if (room) room.emit('state', S).catch(() => {}); }
+
+function players() {
+  const ps = room ? room.peers() : [];
+  return {X: ps.find(p => p.presence.role === 'X'), O: ps.find(p => p.presence.role === 'O')};
+}
+function clickable(i) {
+  if (S.win || S.board[i]) return false;
+  if (local) return true;
+  const p = players();
+  return !!(myRole && S.turn === myRole && p.X && p.O && room.connected());
+}
+
+function render() {
+  $('#sX').textContent = S.score.X; $('#sO').textContent = S.score.O; $('#sD').textContent = S.score.D;
+  const p = players();
+  let st;
+  if (local) {
+    $('#nX').textContent = 'Игрок 1'; $('#nO').textContent = 'Игрок 2';
+    st = S.win ? (S.win === 'D' ? 'Ничья!' : 'Победил ' + S.win + '!') : 'Ход: ' + S.turn;
+  } else {
+    const nm = r => myRole === r ? 'Вы' : (p[r] ? (myRole ? 'Соперник' : 'Игрок') : 'Ожидание…');
+    $('#nX').textContent = nm('X'); $('#nO').textContent = nm('O');
+    if (room && !room.connected()) st = 'Нет соединения…';
+    else if (S.win) st = S.win === 'D' ? 'Ничья!' : (myRole ? (S.win === myRole ? 'Вы победили! 🎉' : 'Соперник победил') : 'Победил ' + S.win);
+    else if (!(p.X && p.O)) st = 'Ждём соперника…';
+    else st = myRole ? (S.turn === myRole ? 'Ваш ход' : 'Ход соперника') : 'Ходит ' + S.turn;
+  }
+  const el = $('#status');
+  if (st !== lastStatus) { el.textContent = st; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); lastStatus = st; }
+  $('#chX').classList.toggle('act', !S.win && S.turn === 'X');
+  $('#chO').classList.toggle('act', !S.win && S.turn === 'O');
+  $('#again').classList.toggle('hidden', !(local || myRole));
+
+  const cells = $('#board').children;
+  for (let i = 0; i < 9; i++) {
+    const c = cells[i], v = S.board[i];
+    if (shown[i] !== v) {
+      shown[i] = v;
+      c.className = 'cell ' + v;
+      c.innerHTML = v === 'X' ? '<svg viewBox="0 0 100 100"><path d="M24 24L76 76"/><path d="M76 24L24 76"/></svg>'
+        : v === 'O' ? '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="28"/></svg>' : '';
+    }
+    c.classList.toggle('win', S.line.includes(i));
+    const ok = clickable(i);
+    c.classList.toggle('ok', ok); c.classList.toggle('off', !ok);
+  }
+  if (S.win && S.win !== 'D' && celebrated !== S.seq) { celebrated = S.seq; boom(S.win === 'X' ? '#6366f1' : '#ec4899'); }
+}
+
+function boom(color) {
+  const fx = $('#fx'), cols = [color, '#fbbf24', '#34d399', '#60a5fa', '#f472b6'];
+  for (let i = 0; i < 46; i++) {
+    const s = document.createElement('span');
+    s.style.left = Math.random() * 100 + '%';
+    s.style.background = cols[i % cols.length];
+    s.style.animationDuration = 1.6 + Math.random() * 1.6 + 's';
+    s.style.animationDelay = Math.random() * .4 + 's';
+    fx.appendChild(s);
+    setTimeout(() => s.remove(), 4000);
+  }
+}
+
+// ---------- role claiming (online) ----------
+const older = (a, b) => ((a.presence.t || 0) - (b.presence.t || 0)) || (a.peer < b.peer ? -1 : 1);
+function claim() {
+  if (!room || !canClaim) return;
+  const ps = room.peers(), me = ps.find(p => p.isMe && p.sameTab);
+  if (!me) return;
+  const others = ps.filter(p => !(p.isMe && p.sameTab));
+  if (myRole && others.some(p => p.presence.role === myRole && older(p, me) < 0)) {
+    myRole = null; room.presence({role: null}).catch(() => {});
+  }
+  if (!myRole) {
+    const free = ['X', 'O'].find(r => !others.some(p => p.presence.role === r));
+    if (free) { myRole = free; room.presence({role: free}).catch(() => {}); }
+  }
+}
+
+async function joinGame(code) {
+  code = (code || '').toLowerCase().trim();
+  const msg = $('#lobbyMsg');
+  if (!/^[a-z0-9]{3,12}$/.test(code)) { msg.textContent = 'Код: 3–12 латинских букв или цифр'; return; }
+  msg.textContent = 'Подключаемся…';
+  try {
+    rc = rc || (window.claude && await window.claude.use('room'));
+    if (!rc) throw new Error('no room');
+    room = await rc.join('ttt-' + code);
+  } catch (e) {
+    room = null;
+    msg.textContent = 'Онлайн недоступен: откройте страницу, войдя в claude.ai.';
+    return;
+  }
+  msg.textContent = '';
+  local = false; myRole = null; canClaim = false; myT = Date.now();
+  S = fresh(); shown = Array(9).fill('');
+  try { location.hash = code; } catch (e) {}
+  $('#codeShow').textContent = code;
+  show('game'); $('#share').classList.remove('hidden');
+  buildBoard();
+  room.presence({t: myT}).catch(() => {});
+  room.on('state', m => {
+    if (m.isMe) return;
+    const d = clean(m.data);
+    if (d && d.seq > S.seq) { S = d; render(); }
+  });
+  room.onPeers(ch => { claim(); if (ch.joined.length && myRole && S.seq > 0) send(); render(); });
+  room.onConnection(() => render());
+  setTimeout(() => { canClaim = true; claim(); render(); }, 1500);
+  render();
+}
+
+function buildBoard() {
+  const b = $('#board'); b.innerHTML = ''; shown = Array(9).fill('');
+  for (let i = 0; i < 9; i++) {
+    const c = document.createElement('div'); c.className = 'cell';
+    c.onclick = () => { if (clickable(i)) applyMove(i); };
+    b.appendChild(c);
+  }
+}
+function show(id) {
+  $('#lobby').classList.toggle('hidden', id !== 'lobby');
+  $('#game').classList.toggle('hidden', id !== 'game');
+}
+
+$('#create').onclick = () => {
+  const al = 'abcdefghjkmnpqrstuvwxyz23456789';
+  let c = ''; for (let i = 0; i < 5; i++) c += al[Math.floor(Math.random() * al.length)];
+  joinGame(c);
+};
+$('#joinBtn').onclick = () => joinGame($('#codeIn').value);
+$('#codeIn').onkeydown = e => { if (e.key === 'Enter') joinGame($('#codeIn').value); };
+$('#localBtn').onclick = () => {
+  local = true; room = null; myRole = null; S = fresh(); lastStatus = '';
+  $('#share').classList.add('hidden'); show('game'); buildBoard(); render();
+};
+$('#again').onclick = newRound;
+$('#leave').onclick = () => {
+  if (room) { room.leave().catch(() => {}); room = null; }
+  myRole = null; local = false; lastStatus = '';
+  try { location.hash = ''; } catch (e) {}
+  show('lobby');
+};
+$('#copy').onclick = async () => {
+  const b = $('#copy');
+  try { await navigator.clipboard.writeText(location.href); b.textContent = 'Скопировано ✓'; }
+  catch (e) { b.textContent = 'Дайте другу код: ' + $('#codeShow').textContent; }
+  setTimeout(() => b.textContent = 'Скопировать ссылку', 2500);
+};
+
+const h = (location.hash || '').slice(1);
+if (h) joinGame(h);
+</script>
+</body>
+</html>
